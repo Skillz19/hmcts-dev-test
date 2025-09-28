@@ -139,7 +139,7 @@ dependencyCheck {
 repositories {
   mavenLocal()
   mavenCentral()
-  maven { url 'https://jitpack.io' }
+  maven { url = 'https://jitpack.io' }
 }
 
 ext {
@@ -181,7 +181,9 @@ dependencies {
   
 }
 
-mainClassName = 'uk.gov.hmcts.reform.dev.Application'
+application {
+  mainClass = 'uk.gov.hmcts.reform.dev.Application'
+}
 
 bootJar {
   archiveFileName = "test-backend.jar"
