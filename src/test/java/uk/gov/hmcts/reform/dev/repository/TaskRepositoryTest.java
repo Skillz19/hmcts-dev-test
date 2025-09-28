@@ -25,6 +25,8 @@ class TaskRepositoryTest {
         Task task = new Task();
         task.setTitle("First TDD Task");
         task.setStatus(TaskStatus.PENDING);
+        task.setDueDate(LocalDateTime.now());
+        task.setStatus(TaskStatus.PENDING);
 
         // when
         Task saved = repository.save(task);
@@ -49,4 +51,15 @@ class TaskRepositoryTest {
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
 
+    @Test
+    void savingTaskWithoutDueDate_shouldThrowException() {
+        // Arrange
+        Task task = new Task();
+        task.setTitle("Task without due date");
+        task.setStatus(TaskStatus.PENDING);
+
+        // Act & Assert
+        assertThatThrownBy(() -> repository.saveAndFlush(task))
+                .isInstanceOf(DataIntegrityViolationException.class);
+    }
 }
