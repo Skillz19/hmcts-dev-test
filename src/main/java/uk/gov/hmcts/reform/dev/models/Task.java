@@ -23,6 +23,7 @@ public class Task {
 
     private String description;
 
+    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
