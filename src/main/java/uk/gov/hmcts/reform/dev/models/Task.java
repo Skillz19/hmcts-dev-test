@@ -27,6 +27,7 @@ public class Task {
     @Enumerated(EnumType.STRING)
     private TaskStatus status;
 
+    @Column(nullable = false)
     private LocalDateTime dueDate;
 
     public Task() {
