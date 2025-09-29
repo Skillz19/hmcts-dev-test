@@ -26,6 +26,10 @@ public class TaskService {
     }
 
     public Task createTask(Task task) {
+        if (task == null) {
+            throw new IllegalArgumentException("Task must not be null");
+        }
+
         return taskRepository.save(task);
     }
 
