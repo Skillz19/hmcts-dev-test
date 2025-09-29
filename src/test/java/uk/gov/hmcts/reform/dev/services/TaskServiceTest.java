@@ -101,4 +101,11 @@ class TaskServiceTest {
                 .hasMessageContaining("Task not found with id " + id);
     }
 
+    @Test
+    void deleteTask_shouldThrowWhenIdIsNull() {
+        Long id = null;
+
+        assertThatThrownBy(() -> service.deleteTask(id))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
 }
