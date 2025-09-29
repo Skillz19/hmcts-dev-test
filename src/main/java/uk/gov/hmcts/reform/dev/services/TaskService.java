@@ -29,6 +29,16 @@ public class TaskService {
         if (task == null) {
             throw new IllegalArgumentException("Task must not be null");
         }
+        // Validate task fields
+        if (task.getTitle() == null || task.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("Task title must not be null or empty");
+        }
+        if (task.getStatus() == null) {
+            throw new IllegalArgumentException("Task status must not be null");
+        }
+        if (task.getDueDate() == null) {
+            throw new IllegalArgumentException("Task due date must not be null");
+        }
 
         return taskRepository.save(task);
     }
