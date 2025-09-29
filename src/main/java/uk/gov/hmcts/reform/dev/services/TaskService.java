@@ -19,6 +19,9 @@ public class TaskService {
     }
 
     public Optional<Task> getTaskById(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Task id must not be null");
+        }
         return taskRepository.findById(id);
     }
 
@@ -42,6 +45,9 @@ public class TaskService {
     }
 
     public void deleteTask(Long id) {
+        if (id == null) {
+            throw new IllegalArgumentException("Task id must not be null");
+        }
         if (!taskRepository.existsById(id)) {
             throw new RuntimeException("Task not found with id " + id);
         }
