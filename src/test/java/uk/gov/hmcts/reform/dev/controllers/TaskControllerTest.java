@@ -42,4 +42,12 @@ class TaskControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.title").value("Sample Task"));
     }
+
+    @Test
+    void getTaskById_shouldReturnNotFoundForNonExistingTask() throws Exception {
+        given(taskService.getTaskById(999L)).willReturn(Optional.empty());
+
+        mockMvc.perform(get("/tasks/999"))
+                .andExpect(status().isNotFound());
+    }
 }
