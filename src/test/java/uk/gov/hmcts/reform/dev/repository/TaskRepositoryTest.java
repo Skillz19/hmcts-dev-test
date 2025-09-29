@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.dao.DataIntegrityViolationException;
 
+import jakarta.transaction.Transactional;
 import uk.gov.hmcts.reform.dev.models.Task;
 import uk.gov.hmcts.reform.dev.models.TaskStatus;
 
@@ -12,6 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 
 @DataJpaTest // Spins up in-memory persistence for testing repositories
 class TaskRepositoryTest {
@@ -62,4 +65,31 @@ class TaskRepositoryTest {
         assertThatThrownBy(() -> repository.saveAndFlush(task))
                 .isInstanceOf(DataIntegrityViolationException.class);
     }
+
+    @Test
+    @Transactional
+    void findAllTasks_shouldReturnAllSavedTasks() {
+        // Arrange
+        Task task1 = new Task();
+        task1.setTitle("Task 1");
+        task1.setStatus(TaskStatus.PENDING);
+        task1.setDueDate(LocalDateTime.now());
+        repository.saveAndFlush(task1);
+
+        Task task2 = new Task();
+        task2.setTitle("Task 2");
+        task2.setStatus(TaskStatus.COMPLETED);
+        task2.setDueDate(LocalDateTime.now());
+        repository.saveAndFlush(task2);
+
+        // Act
+        List<Task> tasks = repository.findAll();
+
+        // Assert
+        assertThat(tasks)
+                .hasSize(2)
+                .extracting(Task::getTitle)
+                .containsExactlyInAnyOrder("Task 1", "Task 2");
+    }
+
 }
