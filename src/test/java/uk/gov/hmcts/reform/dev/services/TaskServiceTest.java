@@ -70,6 +70,42 @@ class TaskServiceTest {
     }
 
     @Test
+    void createTask_shouldThrowWhenTitleIsNull() {
+        Task task = new Task();
+        task.setTitle("");
+        task.setStatus(TaskStatus.PENDING);
+        task.setDueDate(LocalDateTime.now().plusDays(1));
+
+        assertThatThrownBy(() -> service.createTask(task))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Task title must not be null or empty");
+    }
+
+    @Test
+    void createTask_shouldThrowWhenStatusIsNull() {
+        Task task = new Task();
+        task.setTitle("Valid Title");
+        task.setStatus(null);
+        task.setDueDate(LocalDateTime.now().plusDays(1));
+
+        assertThatThrownBy(() -> service.createTask(task))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Task status must not be null");
+    }
+
+    @Test
+    void createTask_shouldThrowWhenDueDateIsNull() {
+        Task task = new Task();
+        task.setTitle("Valid Title");
+        task.setStatus(TaskStatus.PENDING);
+        task.setDueDate(null);
+
+        assertThatThrownBy(() -> service.createTask(task))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Task due date must not be null");
+    }
+
+    @Test
     void getAllTasks_shouldReturnAllTasks() {
         Task task1 = new Task();
         Task task2 = new Task();
