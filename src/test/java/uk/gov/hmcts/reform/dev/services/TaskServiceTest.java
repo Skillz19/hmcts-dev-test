@@ -42,4 +42,19 @@ class TaskServiceTest {
         // Assert
         assertThat(result.getTitle()).isEqualTo("Test Task");
     }
+
+    @Test
+    void createTask_shouldSaveTask() {
+        Task task = new Task();
+        task.setTitle("New Task");
+        task.setStatus(TaskStatus.PENDING);
+        task.setDueDate(LocalDateTime.now().plusDays(1));
+
+        given(repository.save(task)).willReturn(task);
+
+        Task result = service.createTask(task);
+
+        assertThat(result).isEqualTo(task);
+    }
+
 }
