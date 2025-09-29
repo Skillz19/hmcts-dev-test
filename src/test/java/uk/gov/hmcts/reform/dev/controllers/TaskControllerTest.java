@@ -50,4 +50,10 @@ class TaskControllerTest {
         mockMvc.perform(get("/tasks/999"))
                 .andExpect(status().isNotFound());
     }
+
+    @Test
+    void getTaskById_shouldReturnBadRequestForInvalidId() throws Exception {
+        mockMvc.perform(get("/tasks/abc"))
+                .andExpect(status().isBadRequest());
+    }
 }
