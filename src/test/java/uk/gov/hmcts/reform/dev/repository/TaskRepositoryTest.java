@@ -119,7 +119,7 @@ class TaskRepositoryTest {
         Task task = new Task();
         task.setTitle("Task to update");
         task.setStatus(TaskStatus.PENDING);
-        task.setDueDate(LocalDateTime.now().plusDays(1));
+        task.setDueDate(LocalDateTime.now());
         repository.saveAndFlush(task);
 
         Long id = task.getId();
@@ -132,5 +132,21 @@ class TaskRepositoryTest {
         // Assert
         Task updatedTask = repository.findById(id).orElseThrow();
         assertThat(updatedTask.getStatus()).isEqualTo(TaskStatus.COMPLETED);
+    }
+
+    @Test
+    void deleteTask_shouldRemoveTaskFromDatabase() {
+        // Arrange
+        Task task = new Task();
+        task.setTitle("Task to delete");
+        task.setStatus(TaskStatus.PENDING);
+        task.setDueDate(LocalDateTime.now());
+        task = repository.saveAndFlush(task);
+
+        // Act
+        repository.delete(task);
+
+        // Assert
+        assertThat(repository.findById(task.getId()).isPresent()).isFalse();
     }
 }
