@@ -61,6 +61,15 @@ class TaskServiceTest {
     }
 
     @Test
+    void createTask_shouldThrowWhenTaskIsNull() {
+        Task task = null;
+
+        assertThatThrownBy(() -> service.createTask(task))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Task must not be null");
+    }
+
+    @Test
     void getAllTasks_shouldReturnAllTasks() {
         Task task1 = new Task();
         Task task2 = new Task();
