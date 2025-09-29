@@ -130,6 +130,80 @@ class TaskServiceTest {
     }
 
     @Test
+    void updateTask_shouldUpdateDescriptionOnly() {
+        // Arrange
+        Task existingTask = new Task();
+        existingTask.setId(1L);
+        existingTask.setTitle("Original Title");
+        existingTask.setDescription("Original Description");
+        existingTask.setStatus(TaskStatus.PENDING);
+        existingTask.setDueDate(LocalDateTime.now().plusDays(1));
+
+        Task updatedTask = new Task();
+        updatedTask.setId(1L);
+        updatedTask.setDescription("Updated Description"); // only description changes
+
+        given(repository.findById(1L)).willReturn(Optional.of(existingTask));
+        given(repository.save(existingTask)).willReturn(existingTask);
+
+        // Act
+        Task result = service.updateTask(updatedTask);
+
+        // Assert
+        assertThat(result.getTitle()).isEqualTo("Original Title");
+        assertThat(result.getDescription()).isEqualTo("Updated Description");
+        assertThat(result.getStatus()).isEqualTo(TaskStatus.PENDING);
+        verify(repository).save(existingTask);
+    }
+
+    @Test
+    void updateTask_shouldNotOverwriteTitleWithEmptyString() {
+        // Arrange
+        Task existingTask = new Task();
+        existingTask.setId(2L);
+        existingTask.setTitle("Keep This Title");
+        existingTask.setDescription("Description");
+
+        Task updatedTask = new Task();
+        updatedTask.setId(2L);
+        updatedTask.setTitle(""); // invalid, should not overwrite
+
+        given(repository.findById(2L)).willReturn(Optional.of(existingTask));
+        given(repository.save(existingTask)).willReturn(existingTask);
+
+        // Act
+        Task result = service.updateTask(updatedTask);
+
+        // Assert
+        assertThat(result.getTitle()).isEqualTo("Keep This Title");
+    }
+
+    @Test
+    void updateTask_shouldUpdateStatusAndDueDate() {
+        // Arrange
+        Task existingTask = new Task();
+        existingTask.setId(3L);
+        existingTask.setStatus(TaskStatus.PENDING);
+        existingTask.setDueDate(LocalDateTime.now().plusDays(3));
+
+        Task updatedTask = new Task();
+        updatedTask.setId(3L);
+        updatedTask.setStatus(TaskStatus.COMPLETED);
+        LocalDateTime newDueDate = LocalDateTime.now().plusDays(10);
+        updatedTask.setDueDate(newDueDate);
+
+        given(repository.findById(3L)).willReturn(Optional.of(existingTask));
+        given(repository.save(existingTask)).willReturn(existingTask);
+
+        // Act
+        Task result = service.updateTask(updatedTask);
+
+        // Assert
+        assertThat(result.getStatus()).isEqualTo(TaskStatus.COMPLETED);
+        assertThat(result.getDueDate()).isEqualTo(newDueDate);
+    }
+
+    @Test
     void deleteTask_shouldCallRepositoryDelete() {
         Long id = 1L;
         given(repository.existsById(id)).willReturn(true);
