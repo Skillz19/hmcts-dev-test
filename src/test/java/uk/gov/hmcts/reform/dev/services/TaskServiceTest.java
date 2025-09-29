@@ -1,6 +1,7 @@
 package uk.gov.hmcts.reform.dev.services;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -55,6 +56,17 @@ class TaskServiceTest {
         Task result = service.createTask(task);
 
         assertThat(result).isEqualTo(task);
+    }
+
+    @Test
+    void getAllTasks_shouldReturnAllTasks() {
+        Task task1 = new Task();
+        Task task2 = new Task();
+        given(repository.findAll()).willReturn(List.of(task1, task2));
+
+        List<Task> tasks = service.getAllTasks();
+
+        assertThat(tasks).hasSize(2).contains(task1, task2);
     }
 
 }
