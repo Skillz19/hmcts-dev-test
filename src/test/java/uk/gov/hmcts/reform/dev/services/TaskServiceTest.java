@@ -69,4 +69,17 @@ class TaskServiceTest {
         assertThat(tasks).hasSize(2).contains(task1, task2);
     }
 
+    @Test
+    void updateTask_shouldSaveAndReturnTask() {
+        Task task = new Task();
+        task.setId(1L);
+        task.setTitle("Original");
+        given(repository.findById(1L)).willReturn(Optional.of(task));
+        given(repository.save(task)).willReturn(task);
+
+        Task updated = service.updateTask(task);
+
+        assertThat(updated).isEqualTo(task);
+    }
+
 }
