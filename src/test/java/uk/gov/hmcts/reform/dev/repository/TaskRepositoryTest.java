@@ -92,4 +92,24 @@ class TaskRepositoryTest {
                 .containsExactlyInAnyOrder("Task 1", "Task 2");
     }
 
+    @Test
+    @Transactional
+    void findTaskById_shouldReturnCorrectTask() {
+        // Arrange
+        Task task = new Task();
+        task.setTitle("Task to find");
+        task.setStatus(TaskStatus.PENDING);
+        task.setDueDate(LocalDateTime.now());
+        repository.saveAndFlush(task);
+
+        Long id = task.getId();
+
+        // Act
+        Optional<Task> found = repository.findById(id);
+
+        // Assert
+        assertThat(found).isPresent();
+        assertThat(found.get().getTitle()).isEqualTo("Task to find");
+    }
+
 }
