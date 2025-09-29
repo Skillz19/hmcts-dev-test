@@ -18,7 +18,6 @@ public class TaskService {
     }
 
     public Optional<Task> getTaskById(Long id) {
-        // TODO: Implement this method to fetch a task by its ID using the repository
-        throw new AssertionError("Not implemented: getTaskById");
+        return taskRepository.findById(id);
     }
 }
