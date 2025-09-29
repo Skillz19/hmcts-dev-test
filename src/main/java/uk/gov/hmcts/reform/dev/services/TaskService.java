@@ -50,10 +50,11 @@ public class TaskService {
     public Task updateTask(Task updatedTask) {
         Long id = updatedTask.getId();
         return taskRepository.findById(id).map(task -> {
-            task.setTitle(updatedTask.getTitle());
-            task.setDescription(updatedTask.getDescription());
-            task.setStatus(updatedTask.getStatus());
-            task.setDueDate(updatedTask.getDueDate());
+            task.setTitle(Optional.ofNullable(updatedTask.getTitle()).filter((t -> !t.trim().isEmpty()))
+                    .orElse(task.getTitle()));
+            task.setDescription(Optional.ofNullable(updatedTask.getDescription()).orElse(""));
+            task.setStatus(Optional.ofNullable(updatedTask.getStatus()).orElse(task.getStatus()));
+            task.setDueDate(Optional.ofNullable(updatedTask.getDueDate()).orElse(task.getDueDate()));
             return taskRepository.save(task);
         }).orElseThrow(() -> new RuntimeException("Task not found with id " + id));
     }
