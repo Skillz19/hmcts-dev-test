@@ -112,4 +112,25 @@ class TaskRepositoryTest {
         assertThat(found.get().getTitle()).isEqualTo("Task to find");
     }
 
+    @Test
+    @Transactional
+    void updateTaskStatus_shouldPersistChange() {
+        // Arrange
+        Task task = new Task();
+        task.setTitle("Task to update");
+        task.setStatus(TaskStatus.PENDING);
+        task.setDueDate(LocalDateTime.now().plusDays(1));
+        repository.saveAndFlush(task);
+
+        Long id = task.getId();
+
+        // Act
+        Task taskToUpdate = repository.findById(id).orElseThrow();
+        taskToUpdate.setStatus(TaskStatus.COMPLETED);
+        repository.saveAndFlush(taskToUpdate);
+
+        // Assert
+        Task updatedTask = repository.findById(id).orElseThrow();
+        assertThat(updatedTask.getStatus()).isEqualTo(TaskStatus.COMPLETED);
+    }
 }
