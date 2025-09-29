@@ -15,6 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -56,4 +57,30 @@ class TaskControllerTest {
         mockMvc.perform(get("/tasks/abc"))
                 .andExpect(status().isBadRequest());
     }
+
+    @Test
+    void getAllTasks_shouldReturnListOfTasks() throws Exception {
+        // Arrange
+        Task task1 = new Task();
+        task1.setId(1L);
+        task1.setTitle("Task 1");
+        task1.setStatus(TaskStatus.PENDING);
+        task1.setDueDate(LocalDateTime.now().plusDays(1));
+
+        Task task2 = new Task();
+        task2.setId(2L);
+        task2.setTitle("Task 2");
+        task2.setStatus(TaskStatus.PENDING);
+        task2.setDueDate(LocalDateTime.now().plusDays(2));
+
+        given(taskService.getAllTasks()).willReturn(List.of(task1, task2));
+
+        // Act & Assert
+        mockMvc.perform(get("/tasks"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].title").value("Task 1"))
+                .andExpect(jsonPath("$[1].title").value("Task 2"));
+    }
+
 }
