@@ -13,6 +13,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import uk.gov.hmcts.reform.dev.models.Task;
 import uk.gov.hmcts.reform.dev.models.TaskStatus;
@@ -86,8 +87,18 @@ class TaskServiceTest {
     @Test
     void deleteTask_shouldCallRepositoryDelete() {
         Long id = 1L;
+        given(repository.existsById(id)).willReturn(true);
         service.deleteTask(id);
         verify(repository).deleteById(id);
+    }
+
+    @Test
+    void deleteTask_shouldThrowWhenIdNotFound() {
+        Long id = 999L;
+
+        assertThatThrownBy(() -> service.deleteTask(id))
+                .isInstanceOf(RuntimeException.class)
+                .hasMessageContaining("Task not found with id " + id);
     }
 
 }
