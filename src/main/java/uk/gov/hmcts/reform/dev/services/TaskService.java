@@ -29,4 +29,15 @@ public class TaskService {
     public List<Task> getAllTasks() {
         return taskRepository.findAll();
     }
+
+    public Task updateTask(Task updatedTask) {
+        Long id = updatedTask.getId();
+        return taskRepository.findById(id).map(task -> {
+            task.setTitle(updatedTask.getTitle());
+            task.setDescription(updatedTask.getDescription());
+            task.setStatus(updatedTask.getStatus());
+            task.setDueDate(updatedTask.getDueDate());
+            return taskRepository.save(task);
+        }).orElseThrow(() -> new RuntimeException("Task not found with id " + id));
+    }
 }
