@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.verify;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import uk.gov.hmcts.reform.dev.models.Task;
@@ -80,6 +81,13 @@ class TaskServiceTest {
         Task updated = service.updateTask(task);
 
         assertThat(updated).isEqualTo(task);
+    }
+
+    @Test
+    void deleteTask_shouldCallRepositoryDelete() {
+        Long id = 1L;
+        service.deleteTask(id);
+        verify(repository).deleteById(id);
     }
 
 }
