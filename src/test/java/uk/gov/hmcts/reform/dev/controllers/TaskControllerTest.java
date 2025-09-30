@@ -5,14 +5,20 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import uk.gov.hmcts.reform.dev.models.Task;
 import uk.gov.hmcts.reform.dev.models.TaskStatus;
 import uk.gov.hmcts.reform.dev.services.TaskService;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import org.springframework.http.MediaType;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,6 +34,9 @@ class TaskControllerTest {
 
     @MockitoBean
     private TaskService taskService;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Test
     void getTaskById_shouldReturnTask() throws Exception {
@@ -81,6 +90,28 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].title").value("Task 1"))
                 .andExpect(jsonPath("$[1].title").value("Task 2"));
+    }
+
+    @Test
+    void createTask_shouldReturnCreatedTask() throws Exception {
+        // Arrange
+        Task newTask = new Task();
+        newTask.setId(1L);
+        newTask.setTitle("New Task");
+        newTask.setDescription("Description");
+        newTask.setStatus(TaskStatus.PENDING);
+        newTask.setDueDate(LocalDateTime.now().plusDays(1));
+
+        given(taskService.createTask(any(Task.class))).willReturn(newTask);
+
+        // Act & Assert
+        mockMvc.perform(post("/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(newTask)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.title").value("New Task"))
+                .andExpect(jsonPath("$.status").value("PENDING"));
     }
 
 }
