@@ -159,4 +159,14 @@ class TaskControllerTest {
         verify(taskService).deleteTask(taskId);
     }
 
+    @Test
+    void getTaskById_shouldReturnNotFoundWhenTaskDoesNotExist() throws Exception {
+        // Arrange
+        given(taskService.getTaskById(99L)).willReturn(Optional.empty());
+
+        // Act & Assert
+        mockMvc.perform(get("/tasks/99"))
+                .andExpect(status().isNotFound());
+    }
+
 }
