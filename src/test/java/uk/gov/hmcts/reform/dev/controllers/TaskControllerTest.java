@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -112,6 +113,34 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.title").value("New Task"))
                 .andExpect(jsonPath("$.status").value("PENDING"));
+    }
+
+    @Test
+    void updateTaskStatus_shouldReturnUpdatedTask() throws Exception {
+        // Arrange
+        Task existingTask = new Task();
+        existingTask.setId(1L);
+        existingTask.setTitle("Existing Task");
+        existingTask.setDescription("Desc");
+        existingTask.setStatus(TaskStatus.PENDING);
+        existingTask.setDueDate(LocalDateTime.now().plusDays(2));
+
+        Task updatedTask = new Task();
+        updatedTask.setId(1L);
+        updatedTask.setTitle("Existing Task");
+        updatedTask.setDescription("Desc");
+        updatedTask.setStatus(TaskStatus.COMPLETED);
+        updatedTask.setDueDate(existingTask.getDueDate());
+
+        given(taskService.updateTask(any(Task.class))).willReturn(updatedTask);
+
+        // Act & Assert
+        mockMvc.perform(patch("/tasks/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"status\":\"COMPLETED\"}"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.status").value("COMPLETED"));
     }
 
 }
