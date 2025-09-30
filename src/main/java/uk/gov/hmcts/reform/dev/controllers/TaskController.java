@@ -37,4 +37,12 @@ public class TaskController {
         Task created = taskService.createTask(task);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Task> updateTaskStatus(@PathVariable Long id, @RequestBody Task task) {
+        task.setId(id);
+        Task updated = taskService.updateTask(task);
+        return ResponseEntity.ok(updated);
+    }
+
 }
