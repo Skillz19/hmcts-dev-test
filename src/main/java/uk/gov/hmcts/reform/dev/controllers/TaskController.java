@@ -32,4 +32,9 @@ public class TaskController {
         return ResponseEntity.ok(tasks);
     }
 
+    @PostMapping
+    public ResponseEntity<Task> createTask(@RequestBody Task task) {
+        Task created = taskService.createTask(task);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
 }
