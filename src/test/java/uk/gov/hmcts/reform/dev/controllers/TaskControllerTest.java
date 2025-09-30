@@ -13,9 +13,12 @@ import uk.gov.hmcts.reform.dev.services.TaskService;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -141,6 +144,19 @@ class TaskControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.status").value("COMPLETED"));
+    }
+
+    @Test
+    void deleteTask_shouldReturnNoContent() throws Exception {
+        // Arrange
+        Long taskId = 1L;
+        willDoNothing().given(taskService).deleteTask(taskId);
+
+        // Act & Assert
+        mockMvc.perform(delete("/tasks/{id}", taskId))
+                .andExpect(status().isNoContent());
+
+        verify(taskService).deleteTask(taskId);
     }
 
 }
