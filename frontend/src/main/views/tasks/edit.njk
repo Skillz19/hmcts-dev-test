@@ -1,0 +1,33 @@
+{% extends "../template.njk" %}
+
+{% block content %}
+    <h1 class="govuk-heading-l">Edit Task</h1>
+
+    <form method="POST" action="/tasks/{{ task.id }}/edit">
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="title">Title</label>
+            <input class="govuk-input" id="title" name="title" type="text" value="{{ task.title }}" required>
+        </div>
+
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="description">Description</label>
+            <textarea class="govuk-textarea" id="description" name="description" rows="5">{{ task.description }}</textarea>
+        </div>
+
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="status">Status</label>
+            <select class="govuk-select" id="status" name="status" required>
+                <option value="PENDING" {{ "selected" if task.status == "PENDING" }}>Pending</option>
+                <option value="IN_PROGRESS" {{ "selected" if task.status == "IN_PROGRESS" }}>In Progress</option>
+                <option value="COMPLETED" {{ "selected" if task.status == "COMPLETED" }}>Completed</option>
+            </select>
+        </div>
+
+        <div class="govuk-form-group">
+            <label class="govuk-label" for="dueDate">Due Date</label>
+            <input class="govuk-input" id="dueDate" name="dueDate" type="datetime-local" value="{{ task.dueDate }}">
+        </div>
+
+        <button class="govuk-button" type="submit">Update Task</button>
+    </form>
+{% endblock %}

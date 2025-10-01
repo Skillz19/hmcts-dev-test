@@ -1,0 +1,37 @@
+{% extends "../template.njk" %}
+
+{% block content %}
+    <h1 class="govuk-heading-l">Task Details</h1>
+
+    <dl class="govuk-summary-list">
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">Title</dt>
+            <dd class="govuk-summary-list__value">{{ task.title }}</dd>
+        </div>
+
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">Description</dt>
+            <dd class="govuk-summary-list__value">{{ task.description }}</dd>
+        </div>
+
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">Status</dt>
+            <dd class="govuk-summary-list__value">{{ task.status }}</dd>
+        </div>
+
+        <div class="govuk-summary-list__row">
+            <dt class="govuk-summary-list__key">Due Date</dt>
+            <dd class="govuk-summary-list__value">{{ task.dueDate | formatDate }}</dd>
+        </div>
+    </dl>
+
+    <div class="govuk-button-group" style="display: flex; gap: 0.5em; align-items: center;">
+        <a href="/tasks/{{ task.id }}/edit" class="govuk-button govuk-button--secondary">Edit</a>
+
+        <form action="/tasks/{{ task.id }}/delete" method="POST" style="margin: 0;">
+            <button type="submit" class="govuk-button govuk-button--warning">Delete</button>
+        </form>
+
+        <a href="/tasks" class="govuk-button govuk-button--secondary">Back to List</a>
+    </div>
+{% endblock %}
