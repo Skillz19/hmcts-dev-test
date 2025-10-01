@@ -12,7 +12,6 @@ import express from 'express';
 import { glob } from 'glob';
 import favicon from 'serve-favicon';
 
-const { setupDev } = require('./development');
 
 const env = process.env.NODE_ENV || 'development';
 const developmentMode = env === 'development';
@@ -42,8 +41,10 @@ glob
   .map(filename => require(filename))
   .forEach(route => route.default(app));
 
-setupDev(app, developmentMode);
-
+if (developmentMode) {
+  const { setupDev } = require('./development');
+  setupDev(app, developmentMode);
+}
 // error handler
 app.use((err: HTTPError, req: express.Request, res: express.Response, next: express.NextFunction) => {
   // set locals, only providing error in development
