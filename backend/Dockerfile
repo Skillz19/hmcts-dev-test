@@ -13,13 +13,13 @@ COPY src ./src
 # Build the project
 RUN gradle build --no-daemon
 
-FROM openjdk:21-slim
+FROM eclipse-temurin:21-jre-jammy
 
 
 WORKDIR /app
 
-# Copy built jar from builder
-COPY --from=builder /app/build/libs/*.jar app.jar
+# Copy built jar from builder (bootJar output)
+COPY --from=builder /app/build/libs/test-backend.jar app.jar
 
 # Expose port your app listens on
 EXPOSE 4000
