@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 
+import uk.gov.hmcts.reform.dev.api.TaskMapper;
+import uk.gov.hmcts.reform.dev.api.TaskRequest;
+import uk.gov.hmcts.reform.dev.api.TaskResponse;
 import uk.gov.hmcts.reform.dev.models.Task;
 import uk.gov.hmcts.reform.dev.services.TaskService;
 
@@ -27,29 +30,34 @@ public class TaskController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable Long id) {
+    public ResponseEntity<TaskResponse> getTaskById(@PathVariable Long id) {
         return taskService.getTaskById(id)
-                .map(task -> ResponseEntity.ok(task))
+                .map(TaskMapper::toResponse)
+                .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
     @GetMapping
-    public ResponseEntity<List<Task>> getAllTasks() {
-        List<Task> tasks = taskService.getAllTasks();
+    public ResponseEntity<List<TaskResponse>> getAllTasks() {
+        List<TaskResponse> tasks = taskService.getAllTasks()
+                .stream()
+                .map(TaskMapper::toResponse)
+                .toList();
         return ResponseEntity.ok(tasks);
     }
 
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody Task task) {
-        Task created = taskService.createTask(task);
-        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    public ResponseEntity<TaskResponse> createTask(@RequestBody TaskRequest request) {
+        Task created = taskService.createTask(TaskMapper.toEntity(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(TaskMapper.toResponse(created));
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Task> updateTaskStatus(@PathVariable Long id, @RequestBody Task task) {
-        task.setId(id);
-        Task updated = taskService.updateTask(task);
-        return ResponseEntity.ok(updated);
+    public ResponseEntity<TaskResponse> updateTaskStatus(@PathVariable Long id, @RequestBody TaskRequest request) {
+        Task entity = TaskMapper.toEntity(request);
+        entity.setId(id);
+        Task updated = taskService.updateTask(entity);
+        return ResponseEntity.ok(TaskMapper.toResponse(updated));
     }
 
     @DeleteMapping("/{id}")
