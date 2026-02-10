@@ -16,6 +16,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willDoNothing;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -134,6 +135,71 @@ class TaskControllerTest {
     }
 
     @Test
+    void createTask_shouldReturnBadRequestWhenTitleIsBlank() throws Exception {
+        TaskRequest invalidRequest = new TaskRequest(
+                "   ",
+                "Description",
+                TaskStatus.PENDING,
+                LocalDateTime.now().plusDays(1));
+
+        mockMvc.perform(post("/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Validation failed"))
+                .andExpect(jsonPath("$.fieldErrors.title").value("title must not be blank"));
+
+        verifyNoInteractions(taskService);
+    }
+
+    @Test
+    void createTask_shouldReturnBadRequestWhenStatusIsNull() throws Exception {
+        TaskRequest invalidRequest = new TaskRequest(
+                "New Task",
+                "Description",
+                null,
+                LocalDateTime.now().plusDays(1));
+
+        mockMvc.perform(post("/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Validation failed"))
+                .andExpect(jsonPath("$.fieldErrors.status").value("status must not be null"));
+
+        verifyNoInteractions(taskService);
+    }
+
+    @Test
+    void createTask_shouldReturnBadRequestWhenDueDateIsNull() throws Exception {
+        TaskRequest invalidRequest = new TaskRequest(
+                "New Task",
+                "Description",
+                TaskStatus.PENDING,
+                null);
+
+        mockMvc.perform(post("/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Validation failed"))
+                .andExpect(jsonPath("$.fieldErrors.dueDate").value("dueDate must not be null"));
+
+        verifyNoInteractions(taskService);
+    }
+
+    @Test
+    void createTask_shouldReturnBadRequestWhenBodyIsMalformed() throws Exception {
+        mockMvc.perform(post("/tasks")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"title\":\"x\",\"status\":\"PENDING\",\"dueDate\":"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Request body is missing or invalid"));
+
+        verifyNoInteractions(taskService);
+    }
+
+    @Test
     void updateTaskStatus_shouldReturnUpdatedTask() throws Exception {
         LocalDateTime dueDate = LocalDateTime.now().plusDays(2);
 
@@ -158,6 +224,23 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.title").value("Existing Task"))
                 .andExpect(jsonPath("$.status").value("COMPLETED"));
+    }
+
+    @Test
+    void updateTaskStatus_shouldReturnBadRequestWhenTitleIsBlank() throws Exception {
+        TaskRequest invalidRequest = new TaskRequest(
+                " ",
+                "Desc",
+                TaskStatus.PENDING,
+                LocalDateTime.now().plusDays(1));
+
+        mockMvc.perform(patch("/tasks/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(invalidRequest)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Validation failed"));
+
+        verifyNoInteractions(taskService);
     }
 
     @Test
