@@ -6,7 +6,10 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import uk.gov.hmcts.reform.dev.exceptions.InvalidTaskStateException;
+import uk.gov.hmcts.reform.dev.exceptions.TaskNotFoundException;
 import uk.gov.hmcts.reform.dev.models.Task;
+import uk.gov.hmcts.reform.dev.models.TaskStatus;
 import uk.gov.hmcts.reform.dev.repository.TaskRepository;
 
 @Service
@@ -48,15 +51,28 @@ public class TaskService {
     }
 
     public Task updateTask(Task updatedTask) {
+        if (updatedTask == null || updatedTask.getId() == null) {
+            throw new IllegalArgumentException("Task id must not be null");
+        }
         Long id = updatedTask.getId();
-        return taskRepository.findById(id).map(task -> {
-            task.setTitle(Optional.ofNullable(updatedTask.getTitle()).filter((t -> !t.trim().isEmpty()))
-                    .orElse(task.getTitle()));
-            task.setDescription(Optional.ofNullable(updatedTask.getDescription()).orElse(""));
-            task.setStatus(Optional.ofNullable(updatedTask.getStatus()).orElse(task.getStatus()));
-            task.setDueDate(Optional.ofNullable(updatedTask.getDueDate()).orElse(task.getDueDate()));
-            return taskRepository.save(task);
-        }).orElseThrow(() -> new RuntimeException("Task not found with id " + id));
+        Task existing = taskRepository.findById(id)
+                .orElseThrow(() -> new TaskNotFoundException(id));
+
+        TaskStatus requestedStatus = updatedTask.getStatus();
+        if (existing.getStatus() == TaskStatus.COMPLETED
+                && requestedStatus != null
+                && requestedStatus != TaskStatus.COMPLETED) {
+            throw new InvalidTaskStateException("Cannot move task from COMPLETED to another state");
+        }
+
+        existing.setTitle(Optional.ofNullable(updatedTask.getTitle())
+                .filter(t -> !t.trim().isEmpty())
+                .orElse(existing.getTitle()));
+        existing.setDescription(Optional.ofNullable(updatedTask.getDescription()).orElse(""));
+        existing.setStatus(Optional.ofNullable(requestedStatus).orElse(existing.getStatus()));
+        existing.setDueDate(Optional.ofNullable(updatedTask.getDueDate()).orElse(existing.getDueDate()));
+
+        return taskRepository.save(existing);
     }
 
     public void deleteTask(Long id) {
@@ -64,7 +80,7 @@ public class TaskService {
             throw new IllegalArgumentException("Task id must not be null");
         }
         if (!taskRepository.existsById(id)) {
-            throw new RuntimeException("Task not found with id " + id);
+            throw new TaskNotFoundException(id);
         }
         taskRepository.deleteById(id);
     }
