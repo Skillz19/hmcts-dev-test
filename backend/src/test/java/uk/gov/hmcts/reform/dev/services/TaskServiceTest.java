@@ -19,6 +19,9 @@ import uk.gov.hmcts.reform.dev.models.Task;
 import uk.gov.hmcts.reform.dev.models.TaskStatus;
 import uk.gov.hmcts.reform.dev.repository.TaskRepository;
 
+import uk.gov.hmcts.reform.dev.exceptions.InvalidTaskStateException;
+import uk.gov.hmcts.reform.dev.exceptions.TaskNotFoundException;
+
 @ExtendWith(MockitoExtension.class)
 class TaskServiceTest {
 
@@ -201,6 +204,37 @@ class TaskServiceTest {
         // Assert
         assertThat(result.getStatus()).isEqualTo(TaskStatus.COMPLETED);
         assertThat(result.getDueDate()).isEqualTo(newDueDate);
+    }
+
+    @Test
+    void updateTask_shouldThrowTaskNotFoundWhenIdNotFound() {
+        Task updatedTask = new Task();
+        updatedTask.setId(999L);
+
+        given(repository.findById(999L)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.updateTask(updatedTask))
+                .isInstanceOf(TaskNotFoundException.class)
+                .hasMessageContaining("Task not found with id 999");
+    }
+
+    @Test
+    void updateTask_shouldThrowInvalidTaskStateWhenReopeningCompletedTask() {
+        Task existing = new Task();
+        existing.setId(1L);
+        existing.setTitle("Done task");
+        existing.setStatus(TaskStatus.COMPLETED);
+        existing.setDueDate(LocalDateTime.now().plusDays(1));
+
+        Task update = new Task();
+        update.setId(1L);
+        update.setStatus(TaskStatus.IN_PROGRESS);
+
+        given(repository.findById(1L)).willReturn(Optional.of(existing));
+
+        assertThatThrownBy(() -> service.updateTask(update))
+                .isInstanceOf(InvalidTaskStateException.class)
+                .hasMessageContaining("Cannot move task from COMPLETED");
     }
 
     @Test
