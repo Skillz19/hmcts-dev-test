@@ -1,10 +1,11 @@
 package uk.gov.hmcts.reform.dev.services;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import uk.gov.hmcts.reform.dev.exceptions.InvalidTaskStateException;
 import uk.gov.hmcts.reform.dev.exceptions.TaskNotFoundException;
@@ -46,8 +47,11 @@ public class TaskService {
         return taskRepository.save(task);
     }
 
-    public List<Task> getAllTasks() {
-        return taskRepository.findAll();
+    public Page<Task> getAllTasks(Pageable pageable) {
+        if (pageable == null) {
+            throw new IllegalArgumentException("Pageable must not be null");
+        }
+        return taskRepository.findAll(pageable);
     }
 
     public Task updateTask(Task updatedTask) {
