@@ -10,7 +10,7 @@ export default function (app: Express) {
   router.get('/', async (req: Request, res: Response) => {
     try {
       const response = await axios.get(`${config.apiBaseUrl}/tasks`)
-      const tasks = response.data.map((task: any) => ({
+      const tasks = response.data.items.map((task: any) => ({
         ...task,
         dueDate: new Date(task.dueDate).toLocaleString('en-GB', {
           day: '2-digit',
