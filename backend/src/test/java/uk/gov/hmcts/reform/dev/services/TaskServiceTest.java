@@ -22,6 +22,11 @@ import uk.gov.hmcts.reform.dev.repository.TaskRepository;
 import uk.gov.hmcts.reform.dev.exceptions.InvalidTaskStateException;
 import uk.gov.hmcts.reform.dev.exceptions.TaskNotFoundException;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
 @ExtendWith(MockitoExtension.class)
 class TaskServiceTest {
 
@@ -112,11 +117,36 @@ class TaskServiceTest {
     void getAllTasks_shouldReturnAllTasks() {
         Task task1 = new Task();
         Task task2 = new Task();
-        given(repository.findAll()).willReturn(List.of(task1, task2));
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Task> page = new PageImpl<>(List.of(task1, task2), pageable, 2);
+        given(repository.findAll(pageable)).willReturn(page);
 
-        List<Task> tasks = service.getAllTasks();
+        Page<Task> tasks = service.getAllTasks(pageable);
 
-        assertThat(tasks).hasSize(2).contains(task1, task2);
+        assertThat(tasks.getTotalElements()).isEqualTo(2);
+        assertThat(tasks.getContent()).containsExactly(task1, task2);
+    }
+
+    @Test
+    void getAllTasks_shouldReturnPagedTasks() {
+        Task task1 = new Task();
+        Task task2 = new Task();
+        Pageable pageable = PageRequest.of(0, 20);
+        Page<Task> page = new PageImpl<>(List.of(task1, task2), pageable, 2);
+
+        given(repository.findAll(pageable)).willReturn(page);
+
+        Page<Task> result = service.getAllTasks(pageable);
+
+        assertThat(result.getTotalElements()).isEqualTo(2);
+        assertThat(result.getContent()).containsExactly(task1, task2);
+    }
+
+    @Test
+    void getAllTasks_shouldThrowWhenPageableIsNull() {
+        assertThatThrownBy(() -> service.getAllTasks(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Pageable must not be null");
     }
 
     @Test
