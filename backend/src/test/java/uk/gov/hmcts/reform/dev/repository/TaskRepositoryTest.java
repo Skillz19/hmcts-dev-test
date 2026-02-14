@@ -16,8 +16,14 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+import jakarta.persistence.EntityManager;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+
 @DataJpaTest // Spins up in-memory persistence for testing repositories
 class TaskRepositoryTest {
+
+    @Autowired
+    private EntityManager entityManager;
 
     @Autowired
     private TaskRepository repository;
@@ -40,6 +46,45 @@ class TaskRepositoryTest {
         Task found = repository.findById(saved.getId()).orElseThrow();
         assertThat(found.getTitle()).isEqualTo("First TDD Task");
         assertThat(found.getStatus()).isEqualTo(TaskStatus.PENDING);
+    }
+
+    @Test
+    void saveTask_shouldPopulateAuditFieldsAndVersion() {
+        Task task = new Task();
+        task.setTitle("Audit Task");
+        task.setStatus(TaskStatus.PENDING);
+        task.setDueDate(LocalDateTime.now().plusDays(1));
+
+        Task saved = repository.saveAndFlush(task);
+
+        assertThat(saved.getVersion()).isNotNull();
+        assertThat(saved.getCreatedAt()).isNotNull();
+        assertThat(saved.getUpdatedAt()).isNotNull();
+    }
+
+    @Test
+    void concurrentUpdates_shouldThrowOptimisticLockingException() {
+        Task task = new Task();
+        task.setTitle("Concurrent Task");
+        task.setStatus(TaskStatus.PENDING);
+        task.setDueDate(LocalDateTime.now().plusDays(1));
+        Task saved = repository.saveAndFlush(task);
+
+        entityManager.clear();
+
+        Task firstCopy = repository.findById(saved.getId()).orElseThrow();
+        Task secondCopy = repository.findById(saved.getId()).orElseThrow();
+
+        entityManager.detach(firstCopy);
+        entityManager.detach(secondCopy);
+
+        firstCopy.setTitle("First update");
+        repository.saveAndFlush(firstCopy);
+
+        secondCopy.setTitle("Second update");
+
+        assertThatThrownBy(() -> repository.saveAndFlush(secondCopy))
+                .isInstanceOf(ObjectOptimisticLockingFailureException.class);
     }
 
     @Test
