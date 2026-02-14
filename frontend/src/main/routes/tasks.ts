@@ -41,7 +41,6 @@ export default function (app: Express) {
         status: req.body.status,
         dueDate: req.body.dueDate ? new Date(req.body.dueDate).toISOString() : new Date().toISOString()
       };
-      console.log('Creating task:', task)
       await axios.post(`${config.apiBaseUrl}/tasks`, task)
       res.redirect('/tasks')
     } catch (error: any) {
@@ -68,7 +67,6 @@ export default function (app: Express) {
       const task = response.data;
 
       // Format the dueDate for datetime-local input
-      console.log('dueDate:', task.dueDate);
       const formattedTask = {
         ...task,
         dueDate: new Date(task.dueDate).toISOString().slice(0, 16)
