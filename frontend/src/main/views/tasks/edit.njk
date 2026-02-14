@@ -16,11 +16,14 @@
 
         <div class="govuk-form-group">
             <label class="govuk-label" for="status">Status</label>
-            <select class="govuk-select" id="status" name="status" required>
+            <select class="govuk-select" id="status" name="status" required {{ "disabled aria-disabled=true" if task.status == "COMPLETED" }}>
                 <option value="PENDING" {{ "selected" if task.status == "PENDING" }}>Pending</option>
                 <option value="IN_PROGRESS" {{ "selected" if task.status == "IN_PROGRESS" }}>In Progress</option>
                 <option value="COMPLETED" {{ "selected" if task.status == "COMPLETED" }}>Completed</option>
             </select>
+            {% if task.status == "COMPLETED" %}
+                <input type="hidden" name="status" value="COMPLETED">
+            {% endif %}
         </div>
 
         <div class="govuk-form-group">
