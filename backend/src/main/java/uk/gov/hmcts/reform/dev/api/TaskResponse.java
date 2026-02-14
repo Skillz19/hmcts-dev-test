@@ -5,8 +5,11 @@ import uk.gov.hmcts.reform.dev.models.TaskStatus;
 
 public record TaskResponse(
         Long id,
+        Long version,
         String title,
         String description,
         TaskStatus status,
-        LocalDateTime dueDate) {
+        LocalDateTime dueDate,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt) {
 }

@@ -18,9 +18,12 @@ public final class TaskMapper {
     public static TaskResponse toResponse(Task task) {
         return new TaskResponse(
                 task.getId(),
+                task.getVersion(),
                 task.getTitle(),
                 task.getDescription(),
                 task.getStatus(),
-                task.getDueDate());
+                task.getDueDate(),
+                task.getCreatedAt(),
+                task.getUpdatedAt());
     }
 }
