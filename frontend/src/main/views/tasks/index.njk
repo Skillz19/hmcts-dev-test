@@ -34,6 +34,26 @@
         {% endfor %}
       </tbody>
     </table>
+
+    <nav class="govuk-!-margin-top-4" aria-label="Task pagination">
+      {% if not first %}
+        <a
+          class="govuk-link govuk-!-margin-right-4"
+          href="/tasks?page={{ page - 1 }}&size={{ size }}&sortBy={{ sortBy }}&direction={{ direction }}"
+        >
+          Previous
+        </a>
+      {% endif %}
+
+      {% if not last %}
+        <a
+          class="govuk-link"
+          href="/tasks?page={{ page + 1 }}&size={{ size }}&sortBy={{ sortBy }}&direction={{ direction }}"
+        >
+          Next
+        </a>
+      {% endif %}
+    </nav>
   {% else %}
     <p>No tasks available.</p>
   {% endif %}
