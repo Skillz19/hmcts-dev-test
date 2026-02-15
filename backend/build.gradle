@@ -154,6 +154,8 @@ dependencies {
   implementation 'org.xerial:sqlite-jdbc:3.47.0.0'
   implementation 'org.hibernate.orm:hibernate-community-dialects:6.6.1.Final'
 
+  implementation 'org.flywaydb:flyway-core:10.22.0'
+
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-web'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-actuator'
   implementation group: 'org.springframework.boot', name: 'spring-boot-starter-aop'
