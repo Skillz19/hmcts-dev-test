@@ -4,7 +4,7 @@ process.on('unhandledRejection', reason => {
 });
 
 export const config = {
-  TEST_URL: process.env.TEST_URL || 'http://localhost:3100',
+  TEST_URL: process.env.TEST_URL || 'https://localhost:3100',
   TestHeadlessBrowser: process.env.TEST_HEADLESS ? process.env.TEST_HEADLESS === 'true' : true,
   TestSlowMo: 250,
   WaitForTimeout: 10000,
@@ -21,6 +21,10 @@ config.helpers = {
     url: config.TEST_URL,
     show: !config.TestHeadlessBrowser,
     browser: 'chromium',
+    chromiumSandbox: false,
+    launchOptions: {
+      args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+    },
     waitForTimeout: config.WaitForTimeout,
     waitForAction: 1000,
     waitForNavigation: 'networkidle0',
