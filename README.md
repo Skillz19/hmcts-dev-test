@@ -18,6 +18,31 @@ hmcts-dev-test/
 ├── docker-compose.yml
 └── README.md
 
+## Operational Endpoints (Actuator)
+
+This project exposes a minimal set of Spring Boot Actuator endpoints for operational visibility:
+
+- `GET /actuator/health`  
+  Overall application health status.
+
+- `GET /actuator/health/liveness`  
+  Indicates whether the application process is alive.
+
+- `GET /actuator/health/readiness`  
+  Indicates whether the application is ready to receive traffic.  
+  This includes dependency checks such as database connectivity.
+
+- `GET /actuator/info`  
+  Basic application metadata.
+
+- `GET /actuator/metrics`  
+  Runtime and application metrics.
+
+### Security Note
+
+This repository is a public sample project and is not currently deployed.  
+For production deployment, actuator endpoints should be restricted using authentication/authorization and/or private network access. Only non-sensitive actuator endpoints are exposed by default.
+
 ---
 
 ## 🚀 Getting Started
