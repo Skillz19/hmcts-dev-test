@@ -109,8 +109,42 @@ jacocoTestReport {
   }
 }
 
-project.tasks['sonarqube'].dependsOn jacocoTestReport
-project.tasks['check'].dependsOn integration
+jacocoTestCoverageVerification {
+  executionData(test, integration, functional, smoke)
+  violationRules {
+    rule {
+      enabled = true
+      limit {
+        counter = 'LINE'
+        value = 'COVEREDRATIO'
+        minimum = 0.75
+      }
+    }
+    rule {
+      enabled = true
+      limit {
+        counter = 'BRANCH'
+        value = 'COVEREDRATIO'
+        minimum = 0.60
+      }
+    }
+  }
+}
+
+
+tasks.named('sonarqube') {
+  dependsOn jacocoTestReport
+}
+
+tasks.named('check') {
+  dependsOn test
+  dependsOn integration
+  dependsOn functional
+  dependsOn smoke
+  dependsOn jacocoTestReport
+  dependsOn jacocoTestCoverageVerification
+}
+
 
 sonarqube {
   properties {
