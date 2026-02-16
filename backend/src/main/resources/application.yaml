@@ -8,14 +8,18 @@ management:
   endpoint:
     health:
       show-details: "always"
-      # group:
-      #  readiness:
-      #   include: "db"
+      probes:
+         enabled: true
+      group:
+        liveness:
+          include: "livenessState,ping"
+        readiness:
+          include: "readinessState,db,diskSpace,ping"
   endpoints:
     web:
-      base-path: /
+      base-path: /actuator
       exposure:
-        include: info # should we have more?
+        include: "info, health, metrics"
 
 springdoc:
   packagesToScan: uk.gov.hmcts.reform.dev.controllers
