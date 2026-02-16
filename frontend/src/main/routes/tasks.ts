@@ -2,6 +2,7 @@ import { Express, Request, Response } from 'express'
 import express from 'express'
 import axios from 'axios'
 import { config } from '../config'
+import { buildTaskListQueryParams, mapTaskPageToViewModel } from './tasks.helpers'
 
 export default function (app: Express) {
   const router = express.Router()
@@ -9,37 +10,14 @@ export default function (app: Express) {
   // INDEX: GET /tasks → list all tasks
   router.get('/', async (req: Request, res: Response) => {
     try {
-      const page = Number.parseInt((req.query.page as string) || '0', 10);
-      const size = Number.parseInt((req.query.size as string) || '5', 10);
-      const sortBy = (req.query.sortBy as string) || 'id';
-      const direction = (req.query.direction as string) || 'asc';
+      const queryParams = buildTaskListQueryParams(req.query as Record<string, unknown>)
 
       const response = await axios.get(`${config.apiBaseUrl}/tasks`, {
-        params: { page, size, sortBy, direction }
-      });
+        params: queryParams
+      })
 
-      const tasks = response.data.items.map((task: any) => ({
-        ...task,
-        dueDate: new Date(task.dueDate).toLocaleString('en-GB', {
-          day: '2-digit',
-          month: 'short',
-          year: 'numeric',
-          hour: '2-digit',
-          minute: '2-digit'
-        })
-      }));
-
-      res.render('tasks/index', {
-        tasks,
-        page: response.data.page ?? 0,
-        size: response.data.size ?? size,
-        totalElements: response.data.totalElements ?? tasks.length,
-        totalPages: response.data.totalPages ?? 1,
-        first: response.data.first ?? true,
-        last: response.data.last ?? true,
-        sortBy,
-        direction
-      }) // renders src/main/views/tasks/index.njk
+      const viewModel = mapTaskPageToViewModel(response.data, queryParams)
+      res.render('tasks/index', viewModel) // renders src/main/views/tasks/index.njk
     } catch (error: any) {
       console.error('Error fetching tasks:', error.message)
       res.status(500).render('error', { message: 'Failed to fetch tasks' })
