@@ -2,7 +2,8 @@ import {
   buildTaskListQueryParams,
   formatTaskDueDate,
   mapTaskForView,
-  mapTaskPageToViewModel
+  mapTaskPageToViewModel,
+  toBackendDateTime
 } from '../../main/routes/tasks.helpers'
 
 describe('tasks route helpers', () => {
@@ -13,7 +14,7 @@ describe('tasks route helpers', () => {
       page: 0,
       size: 5,
       sortBy: 'id',
-      direction: 'asc'
+      direction: 'desc'
     })
   })
 
@@ -122,5 +123,20 @@ describe('tasks route helpers', () => {
     expect(result.totalPages).toBe(1)
     expect(result.first).toBe(true)
     expect(result.last).toBe(true)
+  })
+
+  test('toBackendDateTime should convert date-only value to LocalDateTime format', () => {
+    const result = toBackendDateTime('2027-12-20')
+    expect(result).toBe('2027-12-20T00:00:00')
+  })
+
+  test('toBackendDateTime should add seconds to datetime-local format', () => {
+    const result = toBackendDateTime('2027-12-20T15:45')
+    expect(result).toBe('2027-12-20T15:45:00')
+  })
+
+  test('toBackendDateTime should keep full LocalDateTime values unchanged', () => {
+    const result = toBackendDateTime('2027-12-20T15:45:30')
+    expect(result).toBe('2027-12-20T15:45:30')
   })
 })
