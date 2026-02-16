@@ -26,7 +26,7 @@ export type TaskPagePayload = {
 const DEFAULT_PAGE = 0
 const DEFAULT_SIZE = 5
 const DEFAULT_SORT_BY = 'id'
-const DEFAULT_DIRECTION = 'asc'
+const DEFAULT_DIRECTION = 'desc'
 
 function parseInteger(value: unknown, fallback: number): number {
   if (typeof value !== 'string' || value.trim() === '') {
@@ -96,4 +96,29 @@ export function mapTaskPageToViewModel(
     sortBy: queryParams.sortBy,
     direction: queryParams.direction
   }
+}
+
+export function toBackendDateTime(value?: string): string {
+  if (!value) {
+    return new Date().toISOString().slice(0, 19)
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+    return `${value}T00:00:00`
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) {
+    return `${value}:00`
+  }
+
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(value)) {
+    return value
+  }
+
+  const parsed = new Date(value)
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.toISOString().slice(0, 19)
+  }
+
+  return new Date().toISOString().slice(0, 19)
 }

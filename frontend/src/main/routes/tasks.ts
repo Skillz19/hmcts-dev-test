@@ -2,7 +2,7 @@ import { Express, Request, Response } from 'express'
 import express from 'express'
 import axios from 'axios'
 import { config } from '../config'
-import { buildTaskListQueryParams, mapTaskPageToViewModel } from './tasks.helpers'
+import { buildTaskListQueryParams, mapTaskPageToViewModel, toBackendDateTime } from './tasks.helpers'
 
 export default function (app: Express) {
   const router = express.Router()
@@ -36,7 +36,7 @@ export default function (app: Express) {
         title: req.body.title,
         description: req.body.description,
         status: req.body.status,
-        dueDate: req.body.dueDate ? new Date(req.body.dueDate).toISOString() : new Date().toISOString()
+        dueDate: toBackendDateTime(req.body.dueDate)
       };
       await axios.post(`${config.apiBaseUrl}/tasks`, task)
       res.redirect('/tasks')
@@ -85,7 +85,7 @@ export default function (app: Express) {
         title,
         description,
         status,
-        dueDate: dueDate ? new Date(dueDate).toISOString() : new Date().toISOString()
+        dueDate: toBackendDateTime(dueDate)
       };
 
       await axios.patch(`${config.apiBaseUrl}/tasks/${req.params.id}`, payload);
