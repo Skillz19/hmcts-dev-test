@@ -39,7 +39,11 @@ app.get('/', (req, res) => {
 glob
   .sync(__dirname + '/routes/**/*.+(ts|js)')
   .map(filename => require(filename))
-  .forEach(route => route.default(app));
+  .forEach(route => {
+    if (typeof route.default === 'function') {
+      route.default(app);
+    }
+  });
 
 if (developmentMode) {
   const { setupDev } = require('./development');
