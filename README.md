@@ -18,6 +18,16 @@ hmcts-dev-test/
 ├── docker-compose.yml
 └── README.md
 
+## Key Engineering Decisions
+
+- DTO-based backend API contract (`TaskRequest` / `TaskResponse`) to keep transport models separate from persistence entities.
+- Input validation at API boundary with explicit `400` responses for invalid payloads.
+- Typed domain exception mapping for predictable error semantics (`400` / `404` / `409`).
+- Paginated and sortable task listing (`GET /tasks`) with explicit response metadata.
+- Optimistic locking with `@Version` to prevent lost updates in concurrent write scenarios.
+- Flyway-managed schema and seed data migrations (`V1__create_task_table.sql`, `V2__seed_initial_tasks.sql`).
+- JaCoCo coverage verification integrated into `check` as a quality gate.
+
 ## Operational Endpoints (Actuator)
 
 This project exposes a minimal set of Spring Boot Actuator endpoints for operational visibility:
@@ -37,6 +47,8 @@ This project exposes a minimal set of Spring Boot Actuator endpoints for operati
 
 - `GET /actuator/metrics`  
   Runtime and application metrics.
+
+Actuator endpoints are intentionally documented in this README for operations and are not part of the Swagger API contract.
 
 ### Security Note
 
@@ -117,9 +129,23 @@ Backend: exposes port 4000 by default
 
 Frontend: exposes port 3100 and expects API_BASE_URL (defaults to backend service in docker-compose)
 
-### Testing
+## Quality Gates
 
-Backend
+Run backend quality gate:
 
+```bash
 cd backend
-./gradlew test
+./gradlew clean check
+```
+
+Run frontend route tests:
+
+```bash
+cd frontend
+yarn test:routes
+```
+
+## Documentation Map
+
+- Backend deep dive: `backend/README.md`
+- Frontend deep dive: `frontend/README.md`
