@@ -22,7 +22,7 @@ describe('Tasks page', () => {
         const apiBaseUrl = new URL(config.apiBaseUrl);
         const scope = nock(`${apiBaseUrl.protocol}//${apiBaseUrl.host}`)
             .get('/tasks')
-            .query({ page: 0, size: 5, sortBy: 'id', direction: 'asc' })
+            .query({ page: 0, size: 5, sortBy: 'id', direction: 'desc' })
             .reply(200, {
                 items: [
                     {
