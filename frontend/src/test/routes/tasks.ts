@@ -87,6 +87,19 @@ describe('Tasks page', () => {
     expect(scope.isDone()).to.equal(true);
   });
 
+  test('GET /tasks/:id should preserve backend 404 status and message', async () => {
+    const apiBaseUrl = new URL(config.apiBaseUrl);
+    const scope = nock(`${apiBaseUrl.protocol}//${apiBaseUrl.host}`).get('/tasks/999').reply(404, {
+      message: 'Task not found with id 999',
+    });
+
+    const res = await request(app).get('/tasks/999');
+
+    expect(res.status).to.equal(404);
+    expect(res.text).to.contain('Failed to fetch task: Task not found with id 999');
+    expect(scope.isDone()).to.equal(true);
+  });
+
   test('GET /tasks/:id/edit should render edit form populated from backend task', async () => {
     const apiBaseUrl = new URL(config.apiBaseUrl);
     const scope = nock(`${apiBaseUrl.protocol}//${apiBaseUrl.host}`).get('/tasks/7').reply(200, {
@@ -149,6 +162,29 @@ describe('Tasks page', () => {
 
     expect(postRes.status).to.equal(302);
     expect(postRes.header.location).to.equal('/tasks');
+    expect(createScope.isDone()).to.equal(true);
+  });
+
+  test('POST /tasks should preserve backend 400 status and message', async () => {
+    const apiBaseUrl = new URL(config.apiBaseUrl);
+    const createScope = nock(`${apiBaseUrl.protocol}//${apiBaseUrl.host}`).post('/tasks').reply(400, {
+      message: 'Validation failed',
+    });
+
+    const getFormRes = await request(app).get('/tasks/new');
+    const csrfToken = extractCsrfToken(getFormRes.text);
+    const cookieHeader = formatCookieHeader(getFormRes.headers['set-cookie']);
+
+    const postRes = await request(app).post('/tasks').set('Cookie', cookieHeader).type('form').send({
+      _csrf: csrfToken,
+      title: '',
+      description: 'Created with token',
+      status: 'PENDING',
+      dueDate: '2026-02-14',
+    });
+
+    expect(postRes.status).to.equal(400);
+    expect(postRes.text).to.contain('Failed to create task: Validation failed');
     expect(createScope.isDone()).to.equal(true);
   });
 

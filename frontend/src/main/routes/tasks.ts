@@ -10,6 +10,15 @@ import {
 import axios, { isAxiosError } from 'axios';
 import express, { Express, Request, Response } from 'express';
 
+function getBackendErrorMessage(errorData: unknown): string | null {
+  if (!errorData || typeof errorData !== 'object') {
+    return null;
+  }
+
+  const message = (errorData as { message?: unknown }).message;
+  return typeof message === 'string' && message.trim() !== '' ? message : null;
+}
+
 function getErrorMessage(error: unknown): string {
   if (isAxiosError(error)) {
     return error.message;
@@ -18,6 +27,23 @@ function getErrorMessage(error: unknown): string {
     return error.message;
   }
   return 'Unexpected error';
+}
+
+function renderRouteError(res: Response, error: unknown, prefix: string): void {
+  if (isAxiosError(error)) {
+    if (error.response) {
+      const backendMessage = getBackendErrorMessage(error.response.data) ?? error.message;
+      res.status(error.response.status).render('error', { message: `${prefix}: ${backendMessage}` });
+      return;
+    }
+
+    if (error.request) {
+      res.status(502).render('error', { message: `${prefix}: backend service unavailable` });
+      return;
+    }
+  }
+
+  res.status(500).render('error', { message: `${prefix}: ${getErrorMessage(error)}` });
 }
 
 export default function (app: Express): void {
@@ -35,7 +61,7 @@ export default function (app: Express): void {
       const viewModel = mapTaskPageToViewModel(response.data, queryParams);
       res.render('tasks/index', viewModel); // renders src/main/views/tasks/index.njk
     } catch (error: unknown) {
-      res.status(500).render('error', { message: `Failed to fetch tasks: ${getErrorMessage(error)}` });
+      renderRouteError(res, error, 'Failed to fetch tasks');
     }
   });
 
@@ -65,7 +91,7 @@ export default function (app: Express): void {
       await axios.post(`${config.apiBaseUrl}/tasks`, task);
       res.redirect('/tasks');
     } catch (error: unknown) {
-      res.status(500).render('error', { message: `Failed to create task: ${getErrorMessage(error)}` });
+      renderRouteError(res, error, 'Failed to create task');
     }
   });
 
@@ -76,7 +102,7 @@ export default function (app: Express): void {
       const task = response.data;
       res.render('tasks/show', { task }); // renders src/main/views/tasks/show.njk
     } catch (error: unknown) {
-      res.status(500).render('error', { message: `Failed to fetch task: ${getErrorMessage(error)}` });
+      renderRouteError(res, error, 'Failed to fetch task');
     }
   });
 
@@ -93,7 +119,7 @@ export default function (app: Express): void {
 
       res.render('tasks/edit', { task: formattedTask });
     } catch (error: unknown) {
-      res.status(500).render('error', { message: `Failed to fetch task for editing: ${getErrorMessage(error)}` });
+      renderRouteError(res, error, 'Failed to fetch task for editing');
     }
   });
 
@@ -121,7 +147,7 @@ export default function (app: Express): void {
       await axios.patch(`${config.apiBaseUrl}/tasks/${req.params.id}`, payload);
       res.redirect(`/tasks/${req.params.id}`);
     } catch (error: unknown) {
-      res.status(500).render('error', { message: `Failed to update task: ${getErrorMessage(error)}` });
+      renderRouteError(res, error, 'Failed to update task');
     }
   });
 
@@ -131,7 +157,7 @@ export default function (app: Express): void {
       await axios.delete(`${config.apiBaseUrl}/tasks/${req.params.id}`);
       res.redirect('/tasks');
     } catch (error: unknown) {
-      res.status(500).render('error', { message: `Failed to delete task: ${getErrorMessage(error)}` });
+      renderRouteError(res, error, 'Failed to delete task');
     }
   });
 
