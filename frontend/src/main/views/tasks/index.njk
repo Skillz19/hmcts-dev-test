@@ -1,4 +1,5 @@
 {% extends "../template.njk" %}
+{% from "../macros/csrf.njk" import csrfProtection %}
 
 {% block content %}
   <h1 class="govuk-heading-l">Tasks</h1>
@@ -27,6 +28,7 @@
               <a href="/tasks/{{ task.id }}" class="govuk-button govuk-button--secondary" style="padding: 0.1em 0.3em;">View</a>
               <a href="/tasks/{{ task.id }}/edit" class="govuk-button govuk-button--secondary" style="padding: 0.1em 0.3em;">Edit</a>
               <form action="/tasks/{{ task.id }}/delete" method="POST" style="display:inline;">
+                {{ csrfProtection(csrfToken) }}
                 <button type="submit" class="govuk-button govuk-button--warning" style="padding: 0.1em 0.3em;">Delete</button>
               </form>
             </td>

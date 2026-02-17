@@ -1,9 +1,11 @@
 {% extends "../template.njk" %}
+{% from "../macros/csrf.njk" import csrfProtection %}
 
 {% block content %}
     <h1 class="govuk-heading-l">Edit Task</h1>
 
     <form method="POST" action="/tasks/{{ task.id }}/edit">
+        {{ csrfProtection(csrfToken) }}
         <div class="govuk-form-group">
             <label class="govuk-label" for="title">Title</label>
             <input class="govuk-input" id="title" name="title" type="text" value="{{ task.title }}" required>
