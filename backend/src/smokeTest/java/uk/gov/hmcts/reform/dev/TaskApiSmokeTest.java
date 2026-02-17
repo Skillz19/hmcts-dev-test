@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.util.UUID;
 
@@ -16,8 +18,18 @@ import static io.restassured.RestAssured.given;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TaskApiSmokeTest {
 
+    private static final String TEST_DB_PATH = System.getProperty("java.io.tmpdir")
+            + "/task-smoke-"
+            + UUID.randomUUID()
+            + ".sqlite";
+
     @LocalServerPort
     private int port;
+
+    @DynamicPropertySource
+    static void overrideDatasource(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", () -> "jdbc:sqlite:" + TEST_DB_PATH);
+    }
 
     @BeforeEach
     public void setUp() {
