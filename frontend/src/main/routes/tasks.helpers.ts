@@ -1,40 +1,40 @@
 export type TaskListQueryParams = {
-  page: number
-  size: number
-  sortBy: string
-  direction: string
-}
+  page: number;
+  size: number;
+  sortBy: string;
+  direction: string;
+};
 
 export type ApiTask = {
-  id: number
-  title: string
-  description?: string
-  status: string
-  dueDate: string
-}
+  id: number;
+  title: string;
+  description?: string;
+  status: string;
+  dueDate: string;
+};
 
 export type TaskPagePayload = {
-  items?: ApiTask[]
-  page?: number
-  size?: number
-  totalElements?: number
-  totalPages?: number
-  first?: boolean
-  last?: boolean
-}
+  items?: ApiTask[];
+  page?: number;
+  size?: number;
+  totalElements?: number;
+  totalPages?: number;
+  first?: boolean;
+  last?: boolean;
+};
 
-const DEFAULT_PAGE = 0
-const DEFAULT_SIZE = 5
-const DEFAULT_SORT_BY = 'id'
-const DEFAULT_DIRECTION = 'desc'
+const DEFAULT_PAGE = 0;
+const DEFAULT_SIZE = 5;
+const DEFAULT_SORT_BY = 'id';
+const DEFAULT_DIRECTION = 'desc';
 
 function parseInteger(value: unknown, fallback: number): number {
   if (typeof value !== 'string' || value.trim() === '') {
-    return fallback
+    return fallback;
   }
 
-  const parsed = Number.parseInt(value, 10)
-  return Number.isFinite(parsed) ? parsed : fallback
+  const parsed = Number.parseInt(value, 10);
+  return Number.isFinite(parsed) ? parsed : fallback;
 }
 
 export function buildTaskListQueryParams(query: Record<string, unknown>): TaskListQueryParams {
@@ -43,14 +43,14 @@ export function buildTaskListQueryParams(query: Record<string, unknown>): TaskLi
     size: parseInteger(query.size, DEFAULT_SIZE),
     sortBy: typeof query.sortBy === 'string' && query.sortBy.trim() !== '' ? query.sortBy : DEFAULT_SORT_BY,
     direction:
-      typeof query.direction === 'string' && query.direction.trim() !== '' ? query.direction : DEFAULT_DIRECTION
-  }
+      typeof query.direction === 'string' && query.direction.trim() !== '' ? query.direction : DEFAULT_DIRECTION,
+  };
 }
 
 export function formatTaskDueDate(dueDate: string): string {
-  const parsed = new Date(dueDate)
+  const parsed = new Date(dueDate);
   if (Number.isNaN(parsed.getTime())) {
-    return dueDate
+    return dueDate;
   }
 
   return parsed.toLocaleString('en-GB', {
@@ -58,32 +58,32 @@ export function formatTaskDueDate(dueDate: string): string {
     month: 'short',
     year: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
-  })
+    minute: '2-digit',
+  });
 }
 
 export function mapTaskForView(task: ApiTask): ApiTask {
   return {
     ...task,
-    dueDate: formatTaskDueDate(task.dueDate)
-  }
+    dueDate: formatTaskDueDate(task.dueDate),
+  };
 }
 
 export function mapTaskPageToViewModel(
   payload: TaskPagePayload,
   queryParams: TaskListQueryParams
 ): {
-  tasks: ApiTask[]
-  page: number
-  size: number
-  totalElements: number
-  totalPages: number
-  first: boolean
-  last: boolean
-  sortBy: string
-  direction: string
+  tasks: ApiTask[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+  first: boolean;
+  last: boolean;
+  sortBy: string;
+  direction: string;
 } {
-  const tasks = (payload.items ?? []).map(mapTaskForView)
+  const tasks = (payload.items ?? []).map(mapTaskForView);
 
   return {
     tasks,
@@ -94,31 +94,49 @@ export function mapTaskPageToViewModel(
     first: payload.first ?? true,
     last: payload.last ?? true,
     sortBy: queryParams.sortBy,
-    direction: queryParams.direction
-  }
+    direction: queryParams.direction,
+  };
 }
 
-export function toBackendDateTime(value?: string): string {
-  if (!value) {
-    return new Date().toISOString().slice(0, 19)
+function normalizeDateTime(value: string): string {
+  const trimmed = value.trim();
+
+  if (!trimmed) {
+    throw new Error('dueDate is required');
   }
 
-  if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return `${value}T00:00:00`
+  if (/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) {
+    return `${trimmed}T00:00:00`;
   }
 
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(value)) {
-    return `${value}:00`
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(trimmed)) {
+    return `${trimmed}:00`;
   }
 
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(value)) {
-    return value
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/.test(trimmed)) {
+    return trimmed;
   }
 
-  const parsed = new Date(value)
+  const parsed = new Date(trimmed);
   if (!Number.isNaN(parsed.getTime())) {
-    return parsed.toISOString().slice(0, 19)
+    return parsed.toISOString().slice(0, 19);
   }
 
-  return new Date().toISOString().slice(0, 19)
+  throw new Error('dueDate must be a valid date');
+}
+
+export function toRequiredBackendDateTime(value?: string): string {
+  if (value === null || value === undefined || value.trim() === '') {
+    throw new Error('dueDate is required');
+  }
+
+  return normalizeDateTime(value);
+}
+
+export function toOptionalBackendDateTime(value?: string): string | undefined {
+  if (value === null || value === undefined || value.trim() === '') {
+    return undefined;
+  }
+
+  return normalizeDateTime(value);
 }
