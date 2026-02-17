@@ -138,6 +138,19 @@ cd backend
 ./gradlew clean check
 ```
 
+`check` includes:
+
+- unit tests (`test`)
+- web-layer integration tests (`integration`)
+- API functional tests (`functional`) covering create/read/list/update-state validation
+- smoke tests (`smoke`) covering health probes and create/read/delete flow
+
+Backend functional/smoke reliability notes:
+
+- run on random ports (no fixed `4000` dependency)
+- use isolated temporary SQLite databases per suite
+- keep Flyway-enabled startup behavior for production-like schema initialization
+
 Run frontend route tests:
 
 ```bash

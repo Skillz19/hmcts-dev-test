@@ -124,6 +124,13 @@ Run full backend quality gate:
 ./gradlew clean check
 ```
 
+`check` executes:
+
+- `test`: unit and focused component tests
+- `integration`: web-layer integration tests
+- `functional`: API workflow tests against a running application context
+- `smoke`: fast operational and critical-path API checks
+
 Run individual suites:
 
 ```bash
@@ -132,6 +139,16 @@ Run individual suites:
 ./gradlew functional
 ./gradlew smoke
 ```
+
+### Functional and Smoke Strategy
+
+The functional and smoke suites are intentionally closer to production behavior than unit tests:
+
+- They start the full Spring Boot app with `RANDOM_PORT` to avoid port collisions in local/CI runs.
+- They use SQLite with Flyway migrations enabled.
+- Each suite overrides the datasource URL to a unique temporary SQLite file, so tests do not mutate `dev-db.sqlite`.
+- Functional tests focus on API behavior and contract guarantees (validation, paging/sorting metadata, state-transition rules).
+- Smoke tests cover health probes and critical create/read/delete journey checks.
 
 ## Coverage Gates
 
