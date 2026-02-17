@@ -1,0 +1,19 @@
+#!/bin/sh
+
+set -e
+
+if git rev-parse --abbrev-ref --symbolic-full-name '@{upstream}' >/dev/null 2>&1; then
+  CHANGED_FILES="$(git diff --name-only @{upstream}...HEAD)"
+else
+  CHANGED_FILES="$(git diff --name-only HEAD~1...HEAD)"
+fi
+
+if printf '%s\n' "$CHANGED_FILES" | grep -q '^frontend/'; then
+  echo "pre-push: frontend changes detected -> running frontend tests"
+  (cd frontend && yarn test)
+fi
+
+if printf '%s\n' "$CHANGED_FILES" | grep -q '^backend/'; then
+  echo "pre-push: backend changes detected -> running backend checks"
+  (cd backend && ./gradlew check)
+fi

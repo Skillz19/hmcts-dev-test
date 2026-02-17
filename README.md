@@ -63,7 +63,7 @@ For production deployment, actuator endpoints should be restricted using authent
 
 - [Docker](https://www.docker.com/) & [Docker Compose](https://docs.docker.com/compose/)
 - Java 21+ (only if running backend outside Docker)
-- Node.js 20+ & Yarn 3 (only if running frontend outside Docker)
+- Node.js 18.x (see `frontend/.nvmrc`) & Yarn 3 (only if running frontend outside Docker)
 
 ---
 
@@ -144,6 +144,14 @@ Run frontend route tests:
 cd frontend
 yarn test:routes
 ```
+
+## Git Hooks
+
+This repository uses Husky hooks from the root `.husky/` directory:
+
+- `pre-commit`: runs frontend lint-staged checks when staged files include `frontend/**`.
+- `pre-push`: runs frontend tests when pushed changes include `frontend/**`.
+- `pre-push`: runs backend `./gradlew check` when pushed changes include `backend/**`.
 
 ## Documentation Map
 

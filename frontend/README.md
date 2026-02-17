@@ -5,6 +5,7 @@
 This is the Node.js / TypeScript frontend for the task management application.
 
 It uses:
+
 - Express server-side routing
 - Nunjucks templates
 - GOV.UK Design System styles/components
@@ -81,17 +82,23 @@ Run all frontend tests (as configured):
 yarn test
 ```
 
+Git hooks (Husky):
+
+- Hooks are configured at repo root in `.husky/`.
+- `pre-commit`: runs `cd frontend && yarn lint-staged` when staged files include `frontend/**`.
+- `pre-push`: runs frontend tests when pushed changes include `frontend/**`, and backend checks when pushed changes include `backend/**`.
+
 Run functional tests (CodeceptJS):
 
 ```bash
- nvm use
+nvm use
 yarn test:functional
 ```
 
 ## Test Notes
 
 - Unit tests cover extracted route helper logic (query parsing, payload mapping, date formatting).
-- Route tests are self-contained and mock backend API calls 
+- Route tests are self-contained and mock backend API calls
 - Functional tests are integration-style and require running services:
   - backend: `http://localhost:4000`
   - frontend: `http://localhost:3100` (docker-compose) or `https://localhost:3100` (local dev)
@@ -100,7 +107,6 @@ yarn test:functional
   1. `docker-compose up --build`
   2. `cd frontend && nvm use`
   3. `cd frontend && TEST_URL=http://localhost:3100 yarn test:functional`
-
 
 ## Build and Lint
 

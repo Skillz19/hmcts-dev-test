@@ -1,0 +1,14 @@
+#!/bin/sh
+
+set -e
+
+STAGED_FILES="$(git diff --cached --name-only --diff-filter=ACMR)"
+
+if printf '%s\n' "$STAGED_FILES" | grep -q '^frontend/'; then
+  echo "pre-commit: frontend changes detected -> running lint-staged"
+  (cd frontend && yarn lint-staged)
+fi
+
+if printf '%s\n' "$STAGED_FILES" | grep -q '^backend/'; then
+  echo "pre-commit: backend changes detected -> backend checks run on pre-push"
+fi
