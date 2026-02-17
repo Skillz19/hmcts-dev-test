@@ -14,7 +14,7 @@ The frontend renders task list/detail/create/edit views and consumes the backend
 
 ## Tech Stack
 
-- Node.js 20+
+- Node.js 18.x (recommended for this project)
 - TypeScript
 - Express
 - Nunjucks
@@ -35,7 +35,7 @@ yarn start
 
 App runs on:
 
-- `http://localhost:3100`
+- `https://localhost:3100`
 
 Development mode:
 
@@ -81,10 +81,26 @@ Run all frontend tests (as configured):
 yarn test
 ```
 
+Run functional tests (CodeceptJS):
+
+```bash
+ nvm use
+yarn test:functional
+```
+
 ## Test Notes
 
 - Unit tests cover extracted route helper logic (query parsing, payload mapping, date formatting).
-- Route tests are self-contained and mock backend API calls (no real backend required).
+- Route tests are self-contained and mock backend API calls 
+- Functional tests are integration-style and require running services:
+  - backend: `http://localhost:4000`
+  - frontend: `http://localhost:3100` (docker-compose) or `https://localhost:3100` (local dev)
+- Use Node 18 for functional tests (see `frontend/.nvmrc`).
+- Recommended functional test setup:
+  1. `docker-compose up --build`
+  2. `cd frontend && nvm use`
+  3. `cd frontend && TEST_URL=http://localhost:3100 yarn test:functional`
+
 
 ## Build and Lint
 
