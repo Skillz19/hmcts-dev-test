@@ -10,7 +10,6 @@ import {
 import axios, { isAxiosError } from 'axios';
 import express, { Express, Request, Response } from 'express';
 
-
 function getErrorMessage(error: unknown): string {
   if (isAxiosError(error)) {
     return error.message;

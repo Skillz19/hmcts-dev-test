@@ -1,6 +1,16 @@
 import { config as testConfig } from '../config';
 
-declare const inject: () => { I: any };
+interface CodeceptI {
+  amOnPage: (url: string) => void;
+  waitInUrl: (url: string) => void;
+  waitForText: (text: string) => void;
+  click: (text: string) => void;
+  fillField: (field: string, value: string) => void;
+  selectOption: (field: string, value: string) => void;
+  see: (text: string, context?: string) => void;
+}
+
+declare const inject: () => { I: CodeceptI };
 declare const Given: (pattern: string, step: (...args: string[]) => void) => void;
 declare const When: (pattern: string, step: (...args: string[]) => void) => void;
 declare const Then: (pattern: string, step: (...args: string[]) => void) => void;

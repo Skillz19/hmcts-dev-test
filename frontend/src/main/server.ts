@@ -21,24 +21,24 @@ if (app.locals.ENV === 'development') {
   };
   httpsServer = https.createServer(sslOptions, app);
   httpsServer.listen(port, () => {
-    console.log(`Application started: https://localhost:${port}`);
+    process.stdout.write(`Application started: https://localhost:${port}\n`);
   });
 } else {
   app.listen(port, () => {
-    console.log(`Application started: http://localhost:${port}`);
+    process.stdout.write(`Application started: http://localhost:${port}\n`);
   });
 }
 
 function gracefulShutdownHandler(signal: string) {
-  console.log(`⚠️ Caught ${signal}, gracefully shutting down. Setting readiness to DOWN`);
+  process.stdout.write(`⚠️ Caught ${signal}, gracefully shutting down. Setting readiness to DOWN\n`);
   // stop the server from accepting new connections
   app.locals.shutdown = true;
 
   setTimeout(() => {
-    console.log('Shutting down application');
+    process.stdout.write('Shutting down application\n');
     // Close server if it's running
     httpsServer?.close(() => {
-      console.log("HTTPS server closed")
+      process.stdout.write('HTTPS server closed\n');
     });
   }, 4000);
 }
