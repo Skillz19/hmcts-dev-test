@@ -69,6 +69,43 @@ describe('Tasks page', () => {
     expect(scope.isDone()).to.equal(true);
   });
 
+  test('GET /tasks/:id should render task details from backend', async () => {
+    const apiBaseUrl = new URL(config.apiBaseUrl);
+    const scope = nock(`${apiBaseUrl.protocol}//${apiBaseUrl.host}`).get('/tasks/42').reply(200, {
+      id: 42,
+      title: 'Task Details',
+      description: 'Details description',
+      status: 'IN_PROGRESS',
+      dueDate: '2026-02-14T10:00:00',
+    });
+
+    const res = await request(app).get('/tasks/42');
+
+    expect(res.status).to.equal(200);
+    expect(res.text).to.contain('Task Details');
+    expect(res.text).to.contain('Details description');
+    expect(scope.isDone()).to.equal(true);
+  });
+
+  test('GET /tasks/:id/edit should render edit form populated from backend task', async () => {
+    const apiBaseUrl = new URL(config.apiBaseUrl);
+    const scope = nock(`${apiBaseUrl.protocol}//${apiBaseUrl.host}`).get('/tasks/7').reply(200, {
+      id: 7,
+      title: 'Editable Task',
+      description: 'Editable description',
+      status: 'PENDING',
+      dueDate: '2026-02-14T10:30:00',
+    });
+
+    const res = await request(app).get('/tasks/7/edit');
+
+    expect(res.status).to.equal(200);
+    expect(res.text).to.contain('Edit Task');
+    expect(res.text).to.contain('Editable Task');
+    expect(res.text).to.contain('2026-02-14T10:30');
+    expect(scope.isDone()).to.equal(true);
+  });
+
   test('POST /tasks should return 403 when CSRF token is missing', async () => {
     const res = await request(app).post('/tasks').type('form').send({
       title: 'Task without CSRF',
@@ -130,6 +167,75 @@ describe('Tasks page', () => {
 
     expect(postRes.status).to.equal(400);
     expect(postRes.text).to.contain('dueDate must be a valid date');
+  });
+
+  test('POST /tasks/:id/edit should patch task when CSRF token is valid and dueDate is blank', async () => {
+    const apiBaseUrl = new URL(config.apiBaseUrl);
+    const getTaskScope = nock(`${apiBaseUrl.protocol}//${apiBaseUrl.host}`).get('/tasks/12').reply(200, {
+      id: 12,
+      title: 'Original Task',
+      description: 'Original description',
+      status: 'PENDING',
+      dueDate: '2026-02-14T10:30:00',
+    });
+
+    const patchScope = nock(`${apiBaseUrl.protocol}//${apiBaseUrl.host}`)
+      .patch('/tasks/12', {
+        title: 'Updated Task',
+        description: 'Updated description',
+        status: 'IN_PROGRESS',
+      })
+      .reply(200, {
+        id: 12,
+        title: 'Updated Task',
+        description: 'Updated description',
+        status: 'IN_PROGRESS',
+        dueDate: '2026-02-14T10:30:00',
+      });
+
+    const getEditFormRes = await request(app).get('/tasks/12/edit');
+    const csrfToken = extractCsrfToken(getEditFormRes.text);
+    const cookieHeader = formatCookieHeader(getEditFormRes.headers['set-cookie']);
+
+    const postRes = await request(app).post('/tasks/12/edit').set('Cookie', cookieHeader).type('form').send({
+      _csrf: csrfToken,
+      title: 'Updated Task',
+      description: 'Updated description',
+      status: 'IN_PROGRESS',
+      dueDate: '',
+    });
+
+    expect(postRes.status).to.equal(302);
+    expect(postRes.header.location).to.equal('/tasks/12');
+    expect(getTaskScope.isDone()).to.equal(true);
+    expect(patchScope.isDone()).to.equal(true);
+  });
+
+  test('POST /tasks/:id/edit should return 400 for invalid dueDate even with CSRF token', async () => {
+    const apiBaseUrl = new URL(config.apiBaseUrl);
+    const getTaskScope = nock(`${apiBaseUrl.protocol}//${apiBaseUrl.host}`).get('/tasks/12').reply(200, {
+      id: 12,
+      title: 'Original Task',
+      description: 'Original description',
+      status: 'PENDING',
+      dueDate: '2026-02-14T10:30:00',
+    });
+
+    const getEditFormRes = await request(app).get('/tasks/12/edit');
+    const csrfToken = extractCsrfToken(getEditFormRes.text);
+    const cookieHeader = formatCookieHeader(getEditFormRes.headers['set-cookie']);
+
+    const postRes = await request(app).post('/tasks/12/edit').set('Cookie', cookieHeader).type('form').send({
+      _csrf: csrfToken,
+      title: 'Updated Task',
+      description: 'Updated description',
+      status: 'IN_PROGRESS',
+      dueDate: 'not-a-date',
+    });
+
+    expect(postRes.status).to.equal(400);
+    expect(postRes.text).to.contain('dueDate must be a valid date');
+    expect(getTaskScope.isDone()).to.equal(true);
   });
 
   test('POST /tasks/:id/delete should return 403 when CSRF token is missing', async () => {
