@@ -190,6 +190,29 @@ class TaskServiceTest {
     }
 
     @Test
+    void updateTask_shouldKeepDescriptionWhenNotProvided() {
+        Task existingTask = new Task();
+        existingTask.setId(4L);
+        existingTask.setTitle("Original Title");
+        existingTask.setDescription("Keep Description");
+        existingTask.setStatus(TaskStatus.PENDING);
+        existingTask.setDueDate(LocalDateTime.now().plusDays(1));
+
+        Task updatedTask = new Task();
+        updatedTask.setId(4L);
+        updatedTask.setTitle("Updated Title");
+        updatedTask.setDescription(null);
+
+        given(repository.findById(4L)).willReturn(Optional.of(existingTask));
+        given(repository.save(existingTask)).willReturn(existingTask);
+
+        Task result = service.updateTask(updatedTask);
+
+        assertThat(result.getTitle()).isEqualTo("Updated Title");
+        assertThat(result.getDescription()).isEqualTo("Keep Description");
+    }
+
+    @Test
     void updateTask_shouldNotOverwriteTitleWithEmptyString() {
         // Arrange
         Task existingTask = new Task();

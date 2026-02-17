@@ -8,6 +8,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import uk.gov.hmcts.reform.dev.api.TaskRequest;
+import uk.gov.hmcts.reform.dev.api.TaskUpdateRequest;
 import uk.gov.hmcts.reform.dev.models.Task;
 import uk.gov.hmcts.reform.dev.models.TaskStatus;
 import uk.gov.hmcts.reform.dev.services.TaskService;
@@ -235,7 +236,7 @@ class TaskControllerTest {
         updated.setStatus(TaskStatus.COMPLETED);
         updated.setDueDate(dueDate);
 
-        TaskRequest request = new TaskRequest("Existing Task",
+        TaskUpdateRequest request = new TaskUpdateRequest("Existing Task",
                 "Desc",
                 TaskStatus.COMPLETED,
                 dueDate);
@@ -253,7 +254,7 @@ class TaskControllerTest {
 
     @Test
     void updateTaskStatus_shouldReturnBadRequestWhenTitleIsBlank() throws Exception {
-        TaskRequest invalidRequest = new TaskRequest(
+        TaskUpdateRequest invalidRequest = new TaskUpdateRequest(
                 " ",
                 "Desc",
                 TaskStatus.PENDING,
@@ -270,7 +271,7 @@ class TaskControllerTest {
 
     @Test
     void updateTaskStatus_shouldReturnNotFoundWhenTaskDoesNotExist() throws Exception {
-        TaskRequest request = new TaskRequest(
+        TaskUpdateRequest request = new TaskUpdateRequest(
                 "Missing Task",
                 "Desc",
                 TaskStatus.PENDING,
@@ -287,7 +288,7 @@ class TaskControllerTest {
 
     @Test
     void updateTaskStatus_shouldReturnConflictWhenTransitionIsInvalid() throws Exception {
-        TaskRequest request = new TaskRequest(
+        TaskUpdateRequest request = new TaskUpdateRequest(
                 "Task",
                 "Desc",
                 TaskStatus.IN_PROGRESS,
@@ -303,6 +304,20 @@ class TaskControllerTest {
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.message")
                         .value("Cannot move task from COMPLETED to another state"));
+    }
+
+    @Test
+    void updateTaskStatus_shouldReturnBadRequestWhenPatchBodyHasNoFields() throws Exception {
+        TaskUpdateRequest request = new TaskUpdateRequest(null, null, null, null);
+
+        mockMvc.perform(patch("/tasks/1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message")
+                        .value("At least one field must be provided for patch update"));
+
+        verifyNoInteractions(taskService);
     }
 
     @Test
