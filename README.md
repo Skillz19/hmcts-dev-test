@@ -28,6 +28,39 @@ hmcts-dev-test/
 - Flyway-managed schema and seed data migrations (`V1__create_task_table.sql`, `V2__seed_initial_tasks.sql`).
 - JaCoCo coverage verification integrated into `check` as a quality gate.
 
+## Engineering Highlights and Tradeoffs
+
+### Highlights
+
+- Reliability-first test pipeline:
+  - `./gradlew check` runs unit, integration, functional, and smoke suites.
+  - functional/smoke suites run on random ports and isolated temporary SQLite databases to avoid environment flakiness.
+- Correctness and API semantics:
+  - `PATCH /tasks/{id}` uses a dedicated partial-update contract (`TaskUpdateRequest`) instead of reusing create DTO semantics.
+  - Invalid state transitions are explicitly rejected (`409`), and optimistic locking protects against lost updates.
+- Security baseline in web layer:
+  - CSRF protection is enforced for all mutating frontend routes.
+  - CSRF behaviour is covered in route tests (missing token rejected, valid token accepted).
+- Operability:
+  - Actuator liveness/readiness/info/metrics endpoints are available and documented.
+  - Readiness includes DB checks to reflect dependency health.
+- Accessibility and UX quality:
+  - Added route-level accessibility checks for critical task pages.
+
+### Tradeoffs and Scope Decisions
+
+- Database choice:
+  - SQLite was chosen to keep local setup simple and deterministic for a take-home project.
+  - This optimizes developer ergonomics over production-scale concurrency characteristics.
+- API and frontend coupling:
+  - The frontend is server-rendered and intentionally thin, delegating business rules to backend APIs.
+  - This improves backend testability but keeps frontend complexity deliberately low.
+- Error handling posture:
+  - The app prefers explicit validation failures (e.g., invalid dates now return `400`) over permissive fallbacks.
+  - This is stricter for users but safer for data integrity.
+- Non-goals for this exercise:
+  - authn/authz, multi-service decomposition, and full observability pipelines were intentionally left out to focus on core backend correctness, resilience basics, and delivery quality.
+
 ## Operational Endpoints (Actuator)
 
 This project exposes a minimal set of Spring Boot Actuator endpoints for operational visibility:
