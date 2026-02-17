@@ -24,6 +24,7 @@ import uk.gov.hmcts.reform.dev.api.TaskMapper;
 import uk.gov.hmcts.reform.dev.api.TaskRequest;
 import uk.gov.hmcts.reform.dev.api.TaskResponse;
 import uk.gov.hmcts.reform.dev.api.TaskSortBy;
+import uk.gov.hmcts.reform.dev.api.TaskUpdateRequest;
 import uk.gov.hmcts.reform.dev.models.Task;
 import uk.gov.hmcts.reform.dev.services.TaskService;
 import uk.gov.hmcts.reform.dev.api.TaskPageResponse;
@@ -84,7 +85,13 @@ public class TaskController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<TaskResponse> updateTaskStatus(@PathVariable Long id,
-            @Valid @RequestBody TaskRequest request) {
+            @Valid @RequestBody TaskUpdateRequest request) {
+        if (request.title() == null
+                && request.description() == null
+                && request.status() == null
+                && request.dueDate() == null) {
+            throw new IllegalArgumentException("At least one field must be provided for patch update");
+        }
         Task entity = TaskMapper.toEntity(request);
         entity.setId(id);
         Task updated = taskService.updateTask(entity);

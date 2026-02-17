@@ -15,6 +15,15 @@ public final class TaskMapper {
         return task;
     }
 
+    public static Task toEntity(TaskUpdateRequest request) {
+        Task task = new Task();
+        task.setTitle(request.title());
+        task.setDescription(request.description());
+        task.setStatus(request.status());
+        task.setDueDate(request.dueDate());
+        return task;
+    }
+
     public static TaskResponse toResponse(Task task) {
         return new TaskResponse(
                 task.getId(),
