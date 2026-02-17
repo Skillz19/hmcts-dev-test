@@ -72,7 +72,7 @@ public class TaskService {
         existing.setTitle(Optional.ofNullable(updatedTask.getTitle())
                 .filter(t -> !t.trim().isEmpty())
                 .orElse(existing.getTitle()));
-        existing.setDescription(Optional.ofNullable(updatedTask.getDescription()).orElse(""));
+        existing.setDescription(Optional.ofNullable(updatedTask.getDescription()).orElse(existing.getDescription()));
         existing.setStatus(Optional.ofNullable(requestedStatus).orElse(existing.getStatus()));
         existing.setDueDate(Optional.ofNullable(updatedTask.getDueDate()).orElse(existing.getDueDate()));
 
