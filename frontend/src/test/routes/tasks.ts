@@ -115,6 +115,23 @@ describe('Tasks page', () => {
     expect(createScope.isDone()).to.equal(true);
   });
 
+  test('POST /tasks should return 400 for invalid dueDate even with CSRF token', async () => {
+    const getFormRes = await request(app).get('/tasks/new');
+    const csrfToken = extractCsrfToken(getFormRes.text);
+    const cookieHeader = formatCookieHeader(getFormRes.headers['set-cookie']);
+
+    const postRes = await request(app).post('/tasks').set('Cookie', cookieHeader).type('form').send({
+      _csrf: csrfToken,
+      title: 'Invalid date task',
+      description: 'Bad input',
+      status: 'PENDING',
+      dueDate: 'not-a-date',
+    });
+
+    expect(postRes.status).to.equal(400);
+    expect(postRes.text).to.contain('dueDate must be a valid date');
+  });
+
   test('POST /tasks/:id/delete should return 403 when CSRF token is missing', async () => {
     const res = await request(app).post('/tasks/1/delete');
 
