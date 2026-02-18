@@ -57,6 +57,8 @@ hmcts-dev-test/
   - This improves backend testability but keeps frontend complexity deliberately low.
 - Error handling posture:
   - The app prefers explicit validation failures (e.g., invalid dates now return `400`) over permissive fallbacks.
+  - Frontend task routes preserve backend API error semantics (`4xx`/`5xx`) instead of collapsing all upstream failures to `500`.
+  - Frontend returns `502` when the backend is unreachable, and reserves `500` for unexpected local failures.
   - This is stricter for users but safer for data integrity.
 - Non-goals for this exercise:
   - authn/authz, multi-service decomposition, and full observability pipelines were intentionally left out to focus on core backend correctness, resilience basics, and delivery quality.

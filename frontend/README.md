@@ -62,6 +62,12 @@ Key environment variable:
 - `POST /tasks/:id/edit` - update task
 - `POST /tasks/:id/delete` - delete task
 
+## Error Handling Semantics
+
+- For backend API responses, frontend task routes preserve backend HTTP status codes and messages (for example `400`, `404`, `409`) rather than rewriting everything to `500`.
+- If the backend is unreachable (request made but no response), frontend returns `502 Bad Gateway`.
+- `500` is used only for unexpected local frontend failures.
+
 ## Testing
 
 Run unit tests:
